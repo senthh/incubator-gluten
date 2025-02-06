@@ -168,7 +168,7 @@ fi
 
 if [ "$SPARK_VERSION" = "3.2" ] || [ "$SPARK_VERSION" = "3.3" ] \
   || [ "$SPARK_VERSION" = "3.4" ] || [ "$SPARK_VERSION" = "3.5" ] \
-  || [ "$SPARK_VERSION" = "ALL" ]; then
+  || [ "$SPARK_VERSION" = "3.5.1" ]|| [ "$SPARK_VERSION" = "ALL" ]; then
   echo "Building for Spark $SPARK_VERSION"
 else
   echo "Invalid Spark version: $SPARK_VERSION"
