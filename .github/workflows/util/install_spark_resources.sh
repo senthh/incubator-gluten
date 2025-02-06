@@ -60,6 +60,20 @@ case "$1" in
     mkdir -p shims/spark34/spark_home/ && \
     mv sql shims/spark34/spark_home/
     ;;
+3.5.1)
+    # Spark-3.5.1
+    cd ${INSTALL_DIR} && \
+    https://mirror.odp.acceldata.dev/ODP/standalone-binaries/3.3.6.0-1/spark-3.5.1.3.3.6.0-1-bin-3.3.6.3.3.6.0-1.tgz
+    wget -nv https://archive.apache.org/dist/spark/spark-3.5.1/spark-3.5.1-bin-hadoop3.tgz && \
+    tar --strip-components=1 -xf spark-3.5.1.3.3.6.0-1-bin-3.3.6.3.3.6.0-1.tgz spark-3.5.1.3.3.6.0-1-bin-3.3.6.3.3.6.0-1/jars/ && \
+    rm -rf spark-3.5.1.3.3.6.0-1-bin-3.3.6.3.3.6.0-1.tgz && \
+    mkdir -p ${INSTALL_DIR}/shims/spark35/spark_home/assembly/target/scala-2.12 && \
+    mv jars ${INSTALL_DIR}/shims/spark35/spark_home/assembly/target/scala-2.12 && \
+    wget -nv https://github.com/acceldata-io/spark3/archive/refs/tags/ODP-3.3.6.0-1-tag.tar.gz && \
+    tar --strip-components=1 -xf ODP-3.3.6.0-1-tag.tar.gz ODP-3.3.6.0-1-tag/sql/core/src/test/resources/  && \
+    mkdir -p shims/spark35/spark_home/ && \
+    mv sql shims/spark35/spark_home/
+    ;;
 3.5)
     # Spark-3.5
     cd ${INSTALL_DIR} && \
