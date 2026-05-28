@@ -25,6 +25,8 @@ import org.apache.spark.sql.execution.{ColumnarBroadcastExchangeExec, ColumnarSh
 import org.apache.spark.sql.execution.adaptive.{AdaptiveSparkPlanHelper, AQEShuffleReadExec}
 import org.apache.spark.sql.execution.exchange.ShuffleExchangeExec
 import org.apache.spark.sql.execution.joins.{BroadcastHashJoinExec, SortMergeJoinExec}
+import org.apache.spark.sql.types.{IntegerType, StructType}
+import org.apache.spark.util.SparkVersionUtil
 import org.apache.spark.utils.GlutenSuiteUtils
 
 import scala.collection.mutable.ArrayBuffer
@@ -318,6 +320,25 @@ class FallbackSuite extends VeloxWholeStageTransformerSuite with AdaptiveSparkPl
       df =>
         val columnarToRow = collectColumnarToRow(df.queryExecution.executedPlan)
         assert(columnarToRow == 1)
+    }
+  }
+
+  test("fallback Spark 4.1 parquet missing all struct fields compatibility") {
+    if (!SparkVersionUtil.gteSpark41) {
+      cancel("Only applicable on Spark 4.1+")
+    }
+    withTempPath { path =>
+      val schema = new StructType().add("s", new StructType().add("b", IntegerType))
+      val file = path.getCanonicalPath
+      spark.range(10).selectExpr("named_struct('a', cast(id as int)) as s").write.parquet(file)
+      withSQLConf("spark.sql.legacy.parquet.returnNullStructIfAllFieldsMissing" -> "false") {
+        spark.read.schema(schema).parquet(file).createOrReplaceTempView("struct_tbl")
+        runQueryAndCompare("select s is null as is_null from struct_tbl") {
+          df =>
+            val plan = df.queryExecution.executedPlan
+            assert(collect(plan) { case g: GlutenPlan => g }.isEmpty)
+        }
+      }
     }
   }
 
